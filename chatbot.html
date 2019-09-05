@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Chat - 2019</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"
+    integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+
+</head>
+
+<body>
+  <script>
+function create_UUID(){
+    var dt = new Date().getTime();
+    var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = (dt + Math.random()*16)%16 | 0;
+        dt = Math.floor(dt/16);
+        return (c=='x' ? r :(r&0x3|0x8)).toString(16);
+    });
+    return uuid;
+}
+    const uid = create_UUID();
+  </script>
+  <div class="row justify-content-center mt-5">
+    <div class="col-md-10">
+      <div class="card">
+        <div class="card-header">
+          <h5>Chat Bot</h5>
+        </div>
+        <div class="card-body">
+            <div class="col-12 text-left">O que Você esta sentindo?</div>
+        </div>
+        <div class="card-footer">
+          <input type="text" class="form-control" id="txtchat" placeholder="digite aqui" /><br>
+          <button class="btn btn-success" type="button" onclick="enviarChat()">enviar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+<script>  
+function enviarChat() {
+    var sintoma = document.getElementById("txtchat").value;
+    document.querySelector(".card-body").innerHTML += '<div class="col-12 text-right">'+ sintoma + '</div>';
+    var data = JSON.stringify({
+      uuid: uid,
+      msg: sintoma,
+      regra: localStorage.getItem('regra')
+    });
+    var url = "http://localhost:8085/chatbot";
+    fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json;charset=UTF-8" },
+          body: data
+        }).then(response => response.json())
+          .then(function(response) {
+            document.querySelector(".card-body").innerHTML += '<div class="col-12 text-left">'+ response.msg + '</div>';
+            localStorage.setItem('regra', response.regra);
+			console.log(response);
+          });
+}
+var data = JSON.stringify({
+      uuid: uid,
+      msg: "O que Você esta sentindo?",
+      regra: 0
+    });
+var url = "http://localhost:8085/chatbot/create";
+    fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json;charset=UTF-8" },
+          body: data
+        }).then(response => response.json())
+          .then(function(response) {
+            localStorage.setItem('regra', 0);
+        });
+</script>
+</html>
